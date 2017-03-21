@@ -949,27 +949,42 @@ void Sequence_Ast::optimize()
 	std::set<int>endSet;
 	int index = 0;
 	endSet.insert(sa_icode_list.size());
+	std::map<string, int> label_incoming;
+	std::multimap<int,string> label_outgoing;
 	BasicBlock *bb = new BasicBlock();
 	for(list<Icode_Stmt *>::iterator it = sa_icode_list.begin() ; it != sa_icode_list.end() ; it++)
 	{
 		index++;
 		Tgt_Op op = (*it)->get_op().get_op();
-
 		if (op == label){
-
 			if(index!=1){
-				// endSet.insert(index-1);
-				cfg.insertBasicBlock(bb);
-				bb = new  BasicBlock();
-			
+				Tgt_Op t_op = (*(--it))->get_op().get_op();
+				if(t_op != beq && t_op != bne && t_op != bgtz && t_op != bgez && t_op != bltz && t_op != blez && t_op != j){
+					label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),"next"));					
+					cfg.insertBasicBlock(bb);
+					bb = new  BasicBlock();					
+				}
+				it++;
+				label_incoming[(dynamic_cast<Label_IC_Stmt *>(*it))->get_label()] = cfg.get_number_blocks();
+				// if((*(--it))->get_op().get_op() != j){
+				// 	label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks()-1,"next"));
+				// }
+				// it++;
 			}
-
 		}
 		bb->insert_stmt(*it);
-		if(op == beq || op==bne || op == bgtz || op==bgez || op == bltz || op==blez || op==j){
-			// endSet.insert(index);
-			// bb->insert_stmt(*it);
-			if((*(++it))->get_op().get_op() != label){
+		if(op == beq || op==bne || op == bgtz || op==bgez || op == bltz || op==blez){
+			label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),(dynamic_cast<Control_Flow_IC_Stmt *>(*it))->get_label())) ;
+			label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),"next"));
+			if(++it !=  sa_icode_list.end()){
+				cfg.insertBasicBlock(bb);
+				bb = new  BasicBlock();
+			}
+			it--;
+		}
+		else if(op==j){
+			label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),(dynamic_cast<Control_Flow_IC_Stmt *>(*it))->get_label())) ;
+			if( ++it != sa_icode_list.end()){
 				cfg.insertBasicBlock(bb);
 				bb = new  BasicBlock();
 			}
@@ -980,7 +995,22 @@ void Sequence_Ast::optimize()
 	}
 	cfg.insertBasicBlock(bb);
 	cfg.printBasicBlocks();
+	cout<<"printing incoming "<<endl;
+	for(std::map<string,int>::iterator it = label_incoming.begin(); it!= label_incoming.end(); it++){
+		cout<<it->first<<" "<<it->second<<endl;
+	}
 
+	cout<<"printing outgoing "<<endl;
+	for(std::map<int,string>::iterator it = label_outgoing.begin(); it!= label_outgoing.end(); it++){
+		cout<<it->first<<" "<<it->second<<endl;
+	}
+
+	for(multimap<int,string>::iterator it = label_outgoing.begin(); it != label_outgoing.end() ; it++ ){
+		if(it->second == "next" && it->first!= cfg.blocks.size()){
+			cfg.blocks[it->first]->succ_blocks.push_back(it->first+1);
+		}
+		cfg.blocks[it->first]->succ_blocks.push_back(label_incoming[it->second]); 
+	}
 	// for(std::set<int>::iterator it = startSet.begin();it!= startSet.end();it++){
 	// 	std::cout<<(*it)<<" ";
 	// }

@@ -291,8 +291,10 @@ class CFG{
 				blocks[i]->print_block();
 			}
 		}
+		int get_number_blocks(){
+			return blocks.size();
+		}
 };
-
 
 class Sequence_Ast: public Ast{
 	list<Ast *> statement_list;
