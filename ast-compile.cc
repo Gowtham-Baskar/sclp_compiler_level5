@@ -1006,10 +1006,10 @@ void Sequence_Ast::optimize()
 	}
 
 	for(multimap<int,string>::iterator it = label_outgoing.begin(); it != label_outgoing.end() ; it++ ){
-		if(it->second == "next" && it->first!= cfg.blocks.size()){
-			cfg.blocks[it->first]->succ_blocks.push_back(it->first+1);
+		if(it->second == "next" && it->first!= cfg.get_number_blocks()){
+			cfg.update_succ(it->first,it->first+1);
 		}
-		cfg.blocks[it->first]->succ_blocks.push_back(label_incoming[it->second]); 
+		cfg.update_succ(it->first,label_incoming[it->second]); 
 	}
 	// for(std::set<int>::iterator it = startSet.begin();it!= startSet.end();it++){
 	// 	std::cout<<(*it)<<" ";
@@ -1019,6 +1019,7 @@ void Sequence_Ast::optimize()
 	// for(std::set<int>::iterator it = endSet.begin();it!= endSet.end();it++){
 	// 	std::cout<<(*it)<<" ";
 	// }
+	cfg.print_succ();
 
 }
 
@@ -1031,8 +1032,17 @@ void BasicBlock::insert_stmt( Icode_Stmt* it){
 void BasicBlock::print_block(){
 	for(list<Icode_Stmt*>::iterator it = icode_list.begin(); it!=icode_list.end() ; it++){
 		(*it)->print_icode(std::cout);
-		// std::cout<<"a"<<endl;
 	}
 }
+void BasicBlock::print_succ(){
+	for(list<BasicBlock*>::iterator it = succ_blocks.begin(); it!=succ_blocks.end() ; it++){
+		(*it)->print_block();
+		cout<<"next succ"<<endl;
+	}
+}
+void BasicBlock::update_succ(BasicBlock * b){
+	succ_blocks.push_back(b);
+}
+
 template class Number_Ast<double>;
 template class Number_Ast<int>;

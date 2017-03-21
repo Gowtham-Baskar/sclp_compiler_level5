@@ -277,6 +277,8 @@ class BasicBlock{
 public:
 	void insert_stmt(Icode_Stmt* it);
 	void print_block();
+	void print_succ();
+	void update_succ(BasicBlock * b);
 };
 
 class CFG{
@@ -293,6 +295,15 @@ class CFG{
 		}
 		int get_number_blocks(){
 			return blocks.size();
+		}
+		void update_succ(int s, int e){
+			blocks[s]->update_succ(blocks[e]);
+		}
+		void print_succ(){
+			for(int i=0;i<blocks.size();i++){
+				cout<<i<<" ";
+				blocks[i]->print_succ();
+			}
 		}
 };
 
