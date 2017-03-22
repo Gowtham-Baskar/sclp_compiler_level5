@@ -61,6 +61,10 @@ void Mem_Addr_Opd::print_asm_opd(ostream & file_buffer)
 		file_buffer << symbol_entry->get_variable_name();
 }
 
+Symbol_Table_Entry * Mem_Addr_Opd::get_symbol_table_entry() 
+{
+	return symbol_entry;
+}
 /****************************** Class Register_Addr_Opd *****************************/
 
 Register_Addr_Opd::Register_Addr_Opd(Register_Descriptor * reg) 

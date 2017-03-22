@@ -991,15 +991,15 @@ void Sequence_Ast::optimize()
 	}
 	cfg.insertBasicBlock(bb);
 	cfg.printBasicBlocks();
-	cout<<"printing incoming "<<endl;
-	for(std::map<string,int>::iterator it = label_incoming.begin(); it!= label_incoming.end(); it++){
-		cout<<it->first<<" "<<it->second<<endl;
-	}
+	// cout<<"printing incoming "<<endl;
+	// for(std::map<string,int>::iterator it = label_incoming.begin(); it!= label_incoming.end(); it++){
+	// 	cout<<it->first<<" "<<it->second<<endl;
+	// }
 
-	cout<<"printing outgoing "<<endl;
-	for(std::map<int,string>::iterator it = label_outgoing.begin(); it!= label_outgoing.end(); it++){
-		cout<<it->first<<" "<<it->second<<endl;
-	}
+	// cout<<"printing outgoing "<<endl;
+	// for(std::map<int,string>::iterator it = label_outgoing.begin(); it!= label_outgoing.end(); it++){
+	// 	cout<<it->first<<" "<<it->second<<endl;
+	// }
 
 	for(multimap<int,string>::iterator it = label_outgoing.begin(); it != label_outgoing.end() ; it++ ){
 		if(it->second == "next" && it->first!= cfg.get_number_blocks()){
@@ -1010,6 +1010,7 @@ void Sequence_Ast::optimize()
 		}
 		
 	}
+	cfg.create_gen_kill();
 
 }
 
@@ -1034,10 +1035,79 @@ void BasicBlock::update_succ(BasicBlock * b){
 	succ_blocks.push_back(b);
 }
 
+bool BasicBlock::check_opd_type(Ics_Opd * i){
+	if(i==NULL)
+		return false;
+	return (typeid(*i)==typeid(Mem_Addr_Opd))||(typeid(*i)==typeid(Register_Addr_Opd));
+}
+
+long int BasicBlock::get_id(Ics_Opd *i){
+	if(typeid(*i)==typeid(Mem_Addr_Opd)){
+		return reinterpret_cast<std::uintptr_t>(&(*(dynamic_cast<Mem_Addr_Opd*>(i)->get_symbol_table_entry())));
+	}
+	else if (typeid(*i)==typeid(Register_Addr_Opd)){
+		return -(i->get_reg()->get_register());
+	}
+	else {
+		return 0;
+	}
+}
+
 void BasicBlock::create_gen_kill(){
 	for(list<Icode_Stmt*>::iterator it = icode_list.begin(); it!=icode_list.end() ; it++){
-		;
+		if(typeid(**it)==typeid(Move_IC_Stmt)){
+			Ics_Opd * result = (*it)->get_result();
+			Ics_Opd * opd1 = (*it)->get_opd1();
+			if(check_opd_type(opd1)){
+				if(kill.find(get_id(opd1))==kill.end()){
+					gen.insert(get_id(opd1));
+				}
+			}
+			if(check_opd_type(result)){
+				kill.insert(get_id(result));
+			}
+		}
+		else if(typeid(**it)==typeid(Compute_IC_Stmt)){
+			Ics_Opd * result = (*it)->get_result();
+			Ics_Opd * opd1 = (*it)->get_opd1();
+			Ics_Opd * opd2 = (*it)->get_opd2();
+			if(check_opd_type(opd1)){
+				if(kill.find(get_id(opd1))==kill.end()){
+					gen.insert(get_id(opd1));
+				}
+			}
+			if(check_opd_type(opd2)){
+				if(kill.find(get_id(opd2))==kill.end()){
+					gen.insert(get_id(opd2));
+				}
+			}
+			if(check_opd_type(result)){
+				kill.insert(get_id(result));
+			}
+		}
+		else if(typeid(**it)==typeid(Control_Flow_IC_Stmt)){
+			Ics_Opd * opd1 = (*it)->get_opd1();
+			Ics_Opd * opd2 = (*it)->get_opd2();
+			if(check_opd_type(opd1)){
+				if(kill.find(get_id(opd1))==kill.end()){
+					gen.insert(get_id(opd1));
+				}
+			}
+			if(check_opd_type(opd2)){
+				if(kill.find(get_id(opd2))==kill.end()){
+					gen.insert(get_id(opd2));
+				}
+			}
+		}
 	}
+	// for(set<long int>::iterator it = kill.begin();it!=kill.end();it++){
+	// 	cout<<*it<<" ";
+	// }
+	// cout<<"next block"<<endl;
+	// for(set<long int>::iterator it = gen.begin();it!=gen.end();it++){
+	// 	cout<<*it<<" ";
+	// }
+	// cout<<"next block"<<endl;
 }
 
 
