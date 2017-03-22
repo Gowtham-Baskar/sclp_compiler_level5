@@ -1041,5 +1041,49 @@ void BasicBlock::create_gen_kill(){
 }
 
 
+void CFG::create_in_out_driver(){
+	set<BasicBlock*>explored;
+	for(int i=0;i<blocks.size();i++){
+		if(explored.find(blocks[i]) == explored.end()){
+			create_in_out(blocks[i],explored);
+		}
+ 	}
+}
+
+void CFG::create_in_out(BasicBlock *b, set<BasicBlock*>&explored){
+	explored.insert(b);
+	if(b->succ_blocks.size() == 0)	// Block without successor. Out can be computed
+	{ 	
+		b->out.clear(); 
+		b->in = b->gen;
+	}
+	else
+	{
+		for(list<BasicBlock*>::iterator it = succ_blocks.begin(); it != succ_blocks.end();it++){
+			if(explored.find(*it) == explored.end())
+				create_in_out(*it,explored);
+
+			union_set(b->out,(*it)->in);
+		}
+		difference_set(b->out,b->kill);
+		union_set(b->in,b->gen);
+	}
+	return;
+}
+
+
+void CFG::union_set(set<long int>&s1,set<long int> &s2){
+	for(set<long>::iterator it = s2.begin();it!=s2.end();it++){
+		s1.insert(*it);
+	}
+}
+
+
+void CFG::difference_set(set<long int> &s1, set<long int> &s2){
+	for(set<long>::iterator it = s2.begin();it!=s2.end();it++){
+		s1.erase(*it);
+	}
+}
+
 template class Number_Ast<double>;
 template class Number_Ast<int>;
