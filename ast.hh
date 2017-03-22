@@ -280,9 +280,12 @@ public:
 	set<long int> kill;
 	set<long int> in;
 	set<long int> out;
+
 	void insert_stmt(Icode_Stmt* it);
 	void print_block();
 	void print_succ();
+	void print_gen_kill();
+	void print_in_out();
 	void update_succ(BasicBlock * b);
 	void create_gen_kill();
 	bool check_opd_type(Ics_Opd * i);
@@ -318,6 +321,24 @@ class CFG{
 				blocks[i]->create_gen_kill();
 			}
 		}
+		void print_gen_kill(){
+			for(int i=0;i<blocks.size();i++){
+				blocks[i]->print_gen_kill();
+			}
+		}
+		void print_in_out(){
+			for(int i=0;i<blocks.size();i++){
+				blocks[i]->print_in_out();
+			}
+		}
+		// runs DFS
+		void create_in_out_driver();
+		// creates in and out sets
+		void create_in_out(BasicBlock *b, set<BasicBlock*>&explored, bool &converged);
+		// util for set union
+		bool union_set(set<long int>&s1,set<long int> &s2);
+		// util for set difference
+		set<long> difference_set(set<long int>&s1,set<long int> &s2);
 };
 
 class Sequence_Ast: public Ast{

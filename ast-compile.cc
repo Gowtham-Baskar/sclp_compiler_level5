@@ -1011,6 +1011,9 @@ void Sequence_Ast::optimize()
 		
 	}
 	cfg.create_gen_kill();
+	cfg.print_gen_kill();
+	cfg.create_in_out_driver();
+	cfg.print_in_out();
 
 }
 
@@ -1031,6 +1034,28 @@ void BasicBlock::print_succ(){
 		(*it)->print_block();
 	}
 }
+void BasicBlock::print_gen_kill(){
+	cout<<endl<<"printing gen"<<endl;
+	for(set<long>::iterator it = gen.begin(); it!=gen.end() ; it++){
+		cout<<(*it)<<" ";
+	}
+	cout<<endl<<"printing kill"<<endl;
+	for(set<long>::iterator it = kill.begin(); it!=kill.end() ; it++){
+		cout<<(*it)<<" ";
+	}
+}
+void BasicBlock::print_in_out(){
+	cout<<endl<<"printing in"<<endl;
+	for(set<long>::iterator it = in.begin(); it!=in.end() ; it++){
+		cout<<(*it)<<" ";
+	}
+	cout<<endl<<"printing out"<<endl;
+	for(set<long>::iterator it = out.begin(); it!=out.end() ; it++){
+		cout<<(*it)<<" ";
+	}
+}
+
+
 void BasicBlock::update_succ(BasicBlock * b){
 	succ_blocks.push_back(b);
 }
@@ -1113,15 +1138,21 @@ void BasicBlock::create_gen_kill(){
 
 void CFG::create_in_out_driver(){
 	set<BasicBlock*>explored;
-	for(int i=0;i<blocks.size();i++){
-		if(explored.find(blocks[i]) == explored.end()){
-			create_in_out(blocks[i],explored);
-		}
- 	}
+	bool converged = false;
+	while(!converged){
+		converged = true;
+		explored.clear();
+		for(int i=0;i<blocks.size();i++){
+			if(explored.find(blocks[i]) == explored.end()){
+				create_in_out(blocks[i],explored,converged);
+			}
+	 	}
+	 }
 }
 
-void CFG::create_in_out(BasicBlock *b, set<BasicBlock*>&explored){
+void CFG::create_in_out(BasicBlock *b, set<BasicBlock*>&explored, bool &converged){
 	explored.insert(b);
+	set<long>temp;
 	if(b->succ_blocks.size() == 0)	// Block without successor. Out can be computed
 	{ 	
 		b->out.clear(); 
@@ -1129,30 +1160,44 @@ void CFG::create_in_out(BasicBlock *b, set<BasicBlock*>&explored){
 	}
 	else
 	{
-		for(list<BasicBlock*>::iterator it = succ_blocks.begin(); it != succ_blocks.end();it++){
+		for(list<BasicBlock*>::iterator it = b->succ_blocks.begin(); it != b->succ_blocks.end();it++){
 			if(explored.find(*it) == explored.end())
-				create_in_out(*it,explored);
+				create_in_out(*it,explored,converged);
 
-			union_set(b->out,(*it)->in);
+			if(!union_set(b->out,(*it)->in)){
+				converged = false;
+			}
 		}
-		difference_set(b->out,b->kill);
-		union_set(b->in,b->gen);
+		temp = difference_set(b->out,b->kill);
+		if(!union_set(b->in,b->gen)){
+			converged = false;
+		}
+		if(!union_set(b->in,temp)){
+			converged = false;
+		}
 	}
 	return;
 }
 
 
-void CFG::union_set(set<long int>&s1,set<long int> &s2){
+bool CFG::union_set(set<long int>&s1,set<long int> &s2){
+	bool converged = true;
 	for(set<long>::iterator it = s2.begin();it!=s2.end();it++){
-		s1.insert(*it);
+		if(s1.find(*it) == s1.end()){
+			s1.insert(*it);
+			converged = false;
+		}
 	}
+	return converged;
 }
 
 
-void CFG::difference_set(set<long int> &s1, set<long int> &s2){
+set<long> CFG::difference_set(set<long int> &s1, set<long int> &s2){
+	set<long>s = s1;
 	for(set<long>::iterator it = s2.begin();it!=s2.end();it++){
-		s1.erase(*it);
+		s.erase(*it);
 	}
+	return s;
 }
 
 template class Number_Ast<double>;
