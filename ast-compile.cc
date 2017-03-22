@@ -1015,6 +1015,9 @@ void Sequence_Ast::optimize()
 	cfg.create_in_out_driver();
 	cfg.print_in_out();
 
+	cfg.remove_dead_stmt();
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1135,6 +1138,87 @@ void BasicBlock::create_gen_kill(){
 	// cout<<"next block"<<endl;
 }
 
+void BasicBlock::remove_dead_stmt(){
+	set<long int> current;
+	list<Icode_Stmt*>::iterator it = icode_list.end();
+	it--;
+	bool to_delete = false;
+	for(; ; it--){
+		if(typeid(**it)==typeid(Control_Flow_IC_Stmt)){
+			Ics_Opd * opd1 = (*it)->get_opd1();
+			Ics_Opd * opd2 = (*it)->get_opd2();
+			if(check_opd_type(opd1)){
+				current.insert(get_id(opd1));
+			}
+			if(check_opd_type(opd2)){
+				current.insert(get_id(opd2));
+			}
+		}
+		else if(typeid(**it)==typeid(Compute_IC_Stmt)){
+			Ics_Opd * result = (*it)->get_result();
+			Ics_Opd * opd1 = (*it)->get_opd1();
+			Ics_Opd * opd2 = (*it)->get_opd2();
+			if(check_opd_type(result)){
+				if(out.find(get_id(result))==out.end()){
+					if(current.find(get_id(result))==current.end()){
+						//remove dead code
+						to_delete = true;
+						break;
+					}
+					else{
+						if(check_opd_type(opd1)){
+							current.insert(get_id(opd1));
+						}
+						if(check_opd_type(opd2)){
+							current.insert(get_id(opd2));
+						}
+					}
+				}
+				else{
+					if(check_opd_type(opd1)){
+						current.insert(get_id(opd1));
+					}
+					if(check_opd_type(opd2)){
+						current.insert(get_id(opd2));
+					}
+				}
+			}
+		}
+		else if(typeid(**it)==typeid(Move_IC_Stmt)){
+			Ics_Opd * result = (*it)->get_result();
+			Ics_Opd * opd1 = (*it)->get_opd1();
+			if(check_opd_type(result)){
+				if(out.find(get_id(result))==out.end()){
+					if(current.find(get_id(result))==current.end()){
+						//remove dead code
+						to_delete = true;
+						break;
+					}
+					else{
+						if(check_opd_type(opd1)){
+							current.insert(get_id(opd1));
+						}
+					}
+				}
+				else{
+					if(check_opd_type(opd1)){
+						current.insert(get_id(opd1));
+					}
+				}		
+			}
+		}
+		if(it == icode_list.begin()){
+			break;
+		}
+	}
+
+	cout<<endl<<"deleted stmts "<<endl;
+	(*it)->print_icode(cout);
+	cout<<endl;
+	if(to_delete){
+		icode_list.erase(it);
+	}
+}
 
 void CFG::create_in_out_driver(){
 	set<BasicBlock*>explored;

@@ -290,6 +290,7 @@ public:
 	void create_gen_kill();
 	bool check_opd_type(Ics_Opd * i);
 	long int get_id(Ics_Opd *i);
+	void remove_dead_stmt();
 };
 
 class CFG{
@@ -328,6 +329,7 @@ class CFG{
 		}
 		void print_in_out(){
 			for(int i=0;i<blocks.size();i++){
+				cout<<"lock num "<<i<<endl;
 				blocks[i]->print_in_out();
 			}
 		}
@@ -339,6 +341,12 @@ class CFG{
 		bool union_set(set<long int>&s1,set<long int> &s2);
 		// util for set difference
 		set<long> difference_set(set<long int>&s1,set<long int> &s2);
+
+		void remove_dead_stmt(){
+			for(int i=0;i<blocks.size();i++){
+				blocks[i]->remove_dead_stmt();
+			}	
+		}
 };
 
 class Sequence_Ast: public Ast{
