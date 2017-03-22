@@ -966,10 +966,6 @@ void Sequence_Ast::optimize()
 				}
 				it++;
 				label_incoming[(dynamic_cast<Label_IC_Stmt *>(*it))->get_label()] = cfg.get_number_blocks();
-				// if((*(--it))->get_op().get_op() != j){
-				// 	label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks()-1,"next"));
-				// }
-				// it++;
 			}
 		}
 		bb->insert_stmt(*it);
@@ -1011,14 +1007,6 @@ void Sequence_Ast::optimize()
 		}
 		cfg.update_succ(it->first,label_incoming[it->second]); 
 	}
-	// for(std::set<int>::iterator it = startSet.begin();it!= startSet.end();it++){
-	// 	std::cout<<(*it)<<" ";
-	// }
-	// std::cout<<std::endl;
-
-	// for(std::set<int>::iterator it = endSet.begin();it!= endSet.end();it++){
-	// 	std::cout<<(*it)<<" ";
-	// }
 	cfg.print_succ();
 
 }
@@ -1043,6 +1031,13 @@ void BasicBlock::print_succ(){
 void BasicBlock::update_succ(BasicBlock * b){
 	succ_blocks.push_back(b);
 }
+
+void BasicBlock::create_gen_kill(){
+	for(list<Icode_Stmt*>::iterator it = icode_list.begin(); it!=icode_list.end() ; it++){
+		;
+	}
+}
+
 
 template class Number_Ast<double>;
 template class Number_Ast<int>;

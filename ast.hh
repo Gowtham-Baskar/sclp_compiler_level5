@@ -6,6 +6,7 @@
 #include<iomanip>
 #include<typeinfo>
 #include<list>
+#include<set>
 
 
 #define AST_SPACE "         "
@@ -274,11 +275,17 @@ public:
 class BasicBlock{
 	list<Icode_Stmt *> icode_list;
 	list<BasicBlock *> succ_blocks;
+	set<Ics_Opd *> Gen;
+	set<Ics_Opd *> Kill;
+	set<Ics_Opd *> In;
+	set<Ics_Opd *> Out;
+
 public:
 	void insert_stmt(Icode_Stmt* it);
 	void print_block();
 	void print_succ();
 	void update_succ(BasicBlock * b);
+	void create_gen_kill();
 };
 
 class CFG{
@@ -303,6 +310,11 @@ class CFG{
 			for(int i=0;i<blocks.size();i++){
 				cout<<i<<" ";
 				blocks[i]->print_succ();
+			}
+		}
+		void create_gen_kill(){
+			for(int i=0;i<blocks.size();i++){
+				blocks[i]->create_gen_kill();
 			}
 		}
 };
