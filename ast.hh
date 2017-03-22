@@ -273,19 +273,20 @@ public:
 };
 
 class BasicBlock{
+public:
 	list<Icode_Stmt *> icode_list;
 	list<BasicBlock *> succ_blocks;
-	set<Ics_Opd *> Gen;
-	set<Ics_Opd *> Kill;
-	set<Ics_Opd *> In;
-	set<Ics_Opd *> Out;
-
-public:
+	set<long int> gen;
+	set<long int> kill;
+	set<long int> in;
+	set<long int> out;
 	void insert_stmt(Icode_Stmt* it);
 	void print_block();
 	void print_succ();
 	void update_succ(BasicBlock * b);
 	void create_gen_kill();
+	bool check_opd_type(Ics_Opd * i);
+	long int get_id(Ics_Opd *i);
 };
 
 class CFG{
