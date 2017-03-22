@@ -308,7 +308,7 @@ class CFG{
 		}
 		void print_succ(){
 			for(int i=0;i<blocks.size();i++){
-				cout<<i<<" ";
+				cout<<"successors for block "<<i<<" ";
 				blocks[i]->print_succ();
 			}
 		}

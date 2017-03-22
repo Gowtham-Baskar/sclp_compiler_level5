@@ -1005,9 +1005,11 @@ void Sequence_Ast::optimize()
 		if(it->second == "next" && it->first!= cfg.get_number_blocks()){
 			cfg.update_succ(it->first,it->first+1);
 		}
-		cfg.update_succ(it->first,label_incoming[it->second]); 
+		else{
+			cfg.update_succ(it->first,label_incoming[it->second]); 	
+		}
+		
 	}
-	cfg.print_succ();
 
 }
 
@@ -1024,8 +1026,8 @@ void BasicBlock::print_block(){
 }
 void BasicBlock::print_succ(){
 	for(list<BasicBlock*>::iterator it = succ_blocks.begin(); it!=succ_blocks.end() ; it++){
+		cout<<endl<<"printing successor";
 		(*it)->print_block();
-		cout<<"next succ"<<endl;
 	}
 }
 void BasicBlock::update_succ(BasicBlock * b){
