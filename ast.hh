@@ -354,6 +354,7 @@ class CFG{
 class Sequence_Ast: public Ast{
 	list<Ast *> statement_list;
 	list<Icode_Stmt *> sa_icode_list;
+	list<Icode_Stmt *> sa_icode_list_opt;
 	CFG cfg;
 public:
 	Sequence_Ast(int line);

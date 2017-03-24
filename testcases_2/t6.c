@@ -1,0 +1,1 @@
+../testcases/t6.c

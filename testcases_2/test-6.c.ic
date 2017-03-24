@@ -1,0 +1,15 @@
+  Procedure: main
+  Intermediate Code Statements
+	load:    	v0 <- a
+	iLoad:    	t0 <- 1
+	slt:    	t1 <- v0 , t0
+	load.d:    	f2 <- b
+	iLoad.d:    	f4 <- 1.10
+	sgt:    	v0 <- f2 , f4
+	and:    	t0 <- t1 , v0
+	beq:    	t0 , zero : goto label0
+	goto label1
+
+label0:    	
+
+label1:    	

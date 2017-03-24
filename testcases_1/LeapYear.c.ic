@@ -1,0 +1,51 @@
+  Procedure: main
+  Intermediate Code Statements
+	iLoad:    	v0 <- 1990
+	store:    	year <- v0
+	load:    	v0 <- year
+	iLoad:    	t0 <- 400
+	div:    	t1 <- v0 , t0
+	iLoad:    	v0 <- 400
+	mul:    	t0 <- t1 , v0
+	load:    	v0 <- year
+	seq:    	t1 <- t0 , v0
+	beq:    	t1 , zero : goto label4
+	iLoad:    	v0 <- 1
+	store:    	cntr <- v0
+	goto label5
+
+label4:    	
+	load:    	v0 <- year
+	iLoad:    	t0 <- 100
+	div:    	t2 <- v0 , t0
+	iLoad:    	v0 <- 100
+	mul:    	t0 <- t2 , v0
+	load:    	v0 <- year
+	seq:    	t2 <- t0 , v0
+	beq:    	t2 , zero : goto label2
+	iLoad:    	v0 <- 0
+	store:    	cntr <- v0
+	goto label3
+
+label2:    	
+	load:    	v0 <- year
+	iLoad:    	t0 <- 4
+	div:    	t3 <- v0 , t0
+	iLoad:    	v0 <- 4
+	mul:    	t0 <- t3 , v0
+	load:    	v0 <- year
+	seq:    	t3 <- t0 , v0
+	beq:    	t3 , zero : goto label0
+	iLoad:    	v0 <- 1
+	store:    	cntr <- v0
+	goto label1
+
+label0:    	
+	iLoad:    	v0 <- 0
+	store:    	cntr <- v0
+
+label1:    	
+
+label3:    	
+
+label5:    	

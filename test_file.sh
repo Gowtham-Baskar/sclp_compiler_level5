@@ -18,7 +18,7 @@ for file in ./$3/*.c; do
   ./$2 -icode testcases_2/${file##*/} >& out_2
 
   diff testcases_1/${file##*/}.ic testcases_2/${file##*/}.ic
-  # diff testcases_1/${file##*/}.spim testcases_2/${file##*/}.spim
+  diff testcases_1/${file##*/}.spim testcases_2/${file##*/}.spim
   diff testcases_1/${file##*/}.dce testcases_2/${file##*/}.dce
 
 done

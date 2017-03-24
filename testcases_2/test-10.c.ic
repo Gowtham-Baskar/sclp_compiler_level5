@@ -1,0 +1,39 @@
+  Procedure: main
+  Intermediate Code Statements
+	iLoad:    	v0 <- 1
+	load:    	t0 <- a
+	iLoad:    	t1 <- 1
+	slt:    	t2 <- t0 , t1
+	load.d:    	f2 <- b
+	iLoad.d:    	f4 <- 1.10
+	sgt:    	t0 <- f2 , f4
+	and:    	t1 <- t2 , t0
+	not:    	t0 <- t1 , v0
+	beq:    	t0 , zero : goto label4
+	load.d:    	f2 <- b
+	iLoad.d:    	f4 <- 1.00
+	seq:    	v0 <- f2 , f4
+	beq:    	v0 , zero : goto label2
+	iLoad.d:    	f2 <- 1.10
+	store.d:    	b <- f2
+	goto label3
+
+label2:    	
+	load.d:    	f2 <- b
+	iLoad.d:    	f4 <- 1.10
+	seq:    	t1 <- f2 , f4
+	beq:    	t1 , zero : goto label0
+	iLoad.d:    	f2 <- 1.00
+	store.d:    	b <- f2
+	goto label1
+
+label0:    	
+
+label1:    	
+
+label3:    	
+	goto label5
+
+label4:    	
+
+label5:    	

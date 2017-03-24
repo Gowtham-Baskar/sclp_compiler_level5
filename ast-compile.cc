@@ -942,6 +942,9 @@ void Sequence_Ast::print_icode(ostream & file_buffer)
 	{
 		(*it)->print_icode(file_buffer);
 	}
+
+	sa_icode_list_opt = sa_icode_list;	//copy the sa_icode_list to sa_icode_list_opt
+
 	// while(!converged){
 		converged = optimize();	
 	// }
@@ -951,7 +954,7 @@ void Sequence_Ast::print_icode(ostream & file_buffer)
   	fb.open (input_file_name_global + ".dce",ios::out);
   	ostream os(&fb);
   	os<<"  Procedure: main\n  Intermediate Code Statements\n";
-	for(list<Icode_Stmt *>::iterator it = sa_icode_list.begin() ; it != sa_icode_list.end() ; it++)
+	for(list<Icode_Stmt *>::iterator it = sa_icode_list_opt.begin() ; it != sa_icode_list_opt.end() ; it++)
 	{
 		(*it)->print_icode(os);
 	}
@@ -961,14 +964,14 @@ void Sequence_Ast::print_icode(ostream & file_buffer)
 
 bool Sequence_Ast::optimize()
 {
-	int sa_icode_count =  sa_icode_list.size();
+	int sa_icode_count =  sa_icode_list_opt.size();
 	std::set<int>endSet;
 	int index = 0;
-	endSet.insert(sa_icode_list.size());
+	endSet.insert(sa_icode_list_opt.size());
 	std::map<string, int> label_incoming;
 	std::multimap<int,string> label_outgoing;
 	BasicBlock *bb = new BasicBlock();
-	for(list<Icode_Stmt *>::iterator it = sa_icode_list.begin() ; it != sa_icode_list.end() ; it++)
+	for(list<Icode_Stmt *>::iterator it = sa_icode_list_opt.begin() ; it != sa_icode_list_opt.end() ; it++)
 	{
 		index++;
 		Tgt_Op op = (*it)->get_op().get_op();
@@ -989,7 +992,7 @@ bool Sequence_Ast::optimize()
 		if(op == beq || op==bne || op == bgtz || op==bgez || op == bltz || op==blez){
 			label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),(dynamic_cast<Control_Flow_IC_Stmt *>(*it))->get_label())) ;
 			label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),"next"));
-			if(++it !=  sa_icode_list.end()){
+			if(++it !=  sa_icode_list_opt.end()){
 				bb->block_num = cfg.get_number_blocks();
 				cfg.insertBasicBlock(bb);
 				bb = new  BasicBlock();
@@ -998,7 +1001,7 @@ bool Sequence_Ast::optimize()
 		}
 		else if(op==j){
 			label_outgoing.insert(std::pair<int,string>(cfg.get_number_blocks(),(dynamic_cast<Control_Flow_IC_Stmt *>(*it))->get_label())) ;
-			if( ++it != sa_icode_list.end()){
+			if( ++it != sa_icode_list_opt.end()){
 				bb->block_num = cfg.get_number_blocks();
 				cfg.insertBasicBlock(bb);
 				bb = new  BasicBlock();
@@ -1042,13 +1045,13 @@ bool Sequence_Ast::optimize()
 	// cout<<"final"<<endl;
 	// cfg.printBasicBlocks();
 
-	sa_icode_list.clear();
+	sa_icode_list_opt.clear();
 	vector<BasicBlock*> v = cfg.get_blocks();
 	for(int i=0;i<v.size();i++){
-		sa_icode_list.splice(sa_icode_list.end(),v[i]->icode_list);
+		sa_icode_list_opt.splice(sa_icode_list_opt.end(),v[i]->icode_list);
 	}
 
-	if(sa_icode_list.size() == sa_icode_count){
+	if(sa_icode_list_opt.size() == sa_icode_count){
 		return true;
 	}
 	return false;
@@ -1180,7 +1183,7 @@ void BasicBlock::create_gen_kill(){
 
 
 void BasicBlock::remove_dead_stmt(){
-	set<long int> current;
+	set<long int> current = out;
 	list<Icode_Stmt*>::iterator it = icode_list.end();
 	it--;
 	bool to_delete = false;
@@ -1201,23 +1204,13 @@ void BasicBlock::remove_dead_stmt(){
 			Ics_Opd * opd1 = (*it)->get_opd1();
 			Ics_Opd * opd2 = (*it)->get_opd2();
 			if(check_opd_type(result)){
-				if(out.find(get_id(result))==out.end()){
-					if(current.find(get_id(result))==current.end()){
-						//remove dead code
-						// cout<<endl<<"deleted stmts "<<endl;
-						// (*it)->print_icode(cout);
-						// cout<<endl;
+				if(current.find(get_id(result))==current.end()){
+					//remove dead code
+					// cout<<endl<<"deleted stmts "<<endl;
+					// (*it)->print_icode(cout);
+					// cout<<endl;
 
-						it = icode_list.erase(it);
-					}
-					else{
-						if(check_opd_type(opd1)){
-							current.insert(get_id(opd1));
-						}
-						if(check_opd_type(opd2)){
-							current.insert(get_id(opd2));
-						}
-					}
+					it = icode_list.erase(it);
 				}
 				else{
 					if(check_opd_type(opd1)){
@@ -1226,6 +1219,7 @@ void BasicBlock::remove_dead_stmt(){
 					if(check_opd_type(opd2)){
 						current.insert(get_id(opd2));
 					}
+					current.erase(get_id(result));
 				}
 			}
 		}
@@ -1233,25 +1227,19 @@ void BasicBlock::remove_dead_stmt(){
 			Ics_Opd * result = (*it)->get_result();
 			Ics_Opd * opd1 = (*it)->get_opd1();
 			if(check_opd_type(result)){
-				if(out.find(get_id(result))==out.end()){
-					if(current.find(get_id(result))==current.end()){
-						//remove dead code
-						// cout<<endl<<"deleted stmts "<<endl;
-						// (*it)->print_icode(cout);
-						// cout<<endl;
-						it = icode_list.erase(it);
-					}
-					else{
-						if(check_opd_type(opd1)){
-							current.insert(get_id(opd1));
-						}
-					}
+				if(current.find(get_id(result))==current.end()){
+					//remove dead code
+					// cout<<endl<<"deleted stmts "<<endl;
+					// (*it)->print_icode(cout);
+					// cout<<endl;
+					it = icode_list.erase(it);
 				}
 				else{
 					if(check_opd_type(opd1)){
 						current.insert(get_id(opd1));
 					}
-				}		
+					current.erase(get_id(result));
+				}
 			}
 		}
 

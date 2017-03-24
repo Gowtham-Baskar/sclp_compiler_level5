@@ -1,0 +1,18 @@
+  Procedure: main
+  Intermediate Code Statements
+	iLoad.d:    	f2 <- 3.50
+	store.d:    	d <- f2
+	load.d:    	f2 <- d
+	iLoad.d:    	f4 <- 2.00
+	sgt:    	v0 <- f2 , f4
+	beq:    	v0 , zero : goto label0
+	load:    	t0 <- b
+	or:    	t2 <- t0 , zero
+	goto label1
+
+label0:    	
+	load:    	t1 <- c
+	or:    	t2 <- t1 , zero
+
+label1:    	
+	store:    	a <- t2

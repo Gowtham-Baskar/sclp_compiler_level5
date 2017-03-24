@@ -1,0 +1,1 @@
+../testcases/GcdLcm.c

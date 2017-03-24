@@ -1,0 +1,94 @@
+
+	.text 			# The .text assembler directive indicates
+	.globl main		# The following is the code (as oppose to data)
+main:				# .globl makes main know to the 
+				# outside of the program.
+# Prologue begins 
+	sw $fp, 0($sp)		# Save the frame pointer
+	sub $fp, $sp, 4		# Update the frame pointer
+
+	sub $sp, $sp, 28		# Make space for the locals
+# Prologue ends
+
+	lw $v0, 0($fp)
+	li $t0, 1
+	neg $t1, $t0
+	sge $t0, $v0, $t1
+	beq $t0, $zero, label8 
+	li $v0, 1
+	lw $t1, 0($fp)
+	sle $t2, $v0, $t1
+	beq $t2, $zero, label0 
+	j label1
+
+label0:    	
+
+label1:    	
+	j label9
+
+label8:    	
+	li $v0, 3
+	li $t1, 3
+	seq $t2, $v0, $t1
+	beq $t2, $zero, label6 
+	li $v0, 1
+	li $t1, 1
+	sne $t3, $v0, $t1
+	beq $t3, $zero, label2 
+	li $v0, 1
+	sw $v0, 0($fp)
+	j label3
+
+label2:    	
+
+label3:    	
+	li $v0, 1
+	li $t1, 1
+	sgt $t3, $v0, $t1
+	beq $t3, $zero, label4 
+	li $v0, 1
+	sw $v0, -4($fp)
+	j label5
+
+label4:    	
+	li $v0, 1
+	sw $v0, -8($fp)
+
+label5:    	
+	j label7
+
+label6:    	
+
+label7:    	
+
+label9:    	
+
+label10:    	
+	li $v0, 3
+	sw $v0, 0($fp)
+
+label11:    	
+	li $v0, 3
+	li $t0, 1
+	seq $t1, $v0, $t0
+	bne $t1, $zero, label10 
+	j label13
+
+label12:    	
+	lw $v0, 0($fp)
+	lw $t0, -4($fp)
+	sub $t2, $v0, $t0
+	sw $t2, 0($fp)
+
+label13:    	
+	li $v0, 1000
+	li $t0, 1
+	seq $t1, $v0, $t0
+	bne $t1, $zero, label12 
+
+# Epilogue Begins
+	add $sp, $sp, 28
+	lw $fp, 0($sp)  
+	jr        $31		# Jump back to the operating system.
+# Epilogue Ends
+

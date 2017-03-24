@@ -1,0 +1,54 @@
+  Procedure: main
+  Intermediate Code Statements
+	load:    	v0 <- a
+	load:    	t0 <- b
+	mul:    	t1 <- v0 , t0
+	load:    	v0 <- c
+	sgt:    	t0 <- t1 , v0
+	load:    	v0 <- b
+	load:    	t1 <- c
+	div:    	t2 <- v0 , t1
+	load:    	v0 <- a
+	slt:    	t1 <- t2 , v0
+	load.d:    	f2 <- d
+	load.d:    	f4 <- e
+	add.d:    	f6 <- f2 , f4
+	load.d:    	f2 <- f
+	sgt:    	v0 <- f6 , f2
+	and:    	t2 <- t1 , v0
+	or:    	v0 <- t0 , t2
+	iLoad:    	t0 <- 1
+	load.d:    	f2 <- e
+	load.d:    	f4 <- f
+	sub.d:    	f6 <- f2 , f4
+	load.d:    	f2 <- d
+	slt:    	t1 <- f6 , f2
+	not:    	t2 <- t1 , t0
+	or:    	t0 <- v0 , t2
+	beq:    	t0 , zero : goto label2
+	load:    	v0 <- a
+	iLoad:    	t1 <- 2
+	load:    	t2 <- b
+	add:    	t3 <- t1 , t2
+	load:    	t1 <- c
+	sub:    	t2 <- t3 , t1
+	sgt:    	t1 <- v0 , t2
+	beq:    	t1 , zero : goto label0
+	load.d:    	f2 <- d
+	iLoad.d:    	f4 <- 2.00
+	sub.d:    	f6 <- f2 , f4
+	store.d:    	d <- f6
+	goto label1
+
+label0:    	
+	load.d:    	f2 <- e
+	iLoad.d:    	f4 <- 2.50
+	add.d:    	f6 <- f2 , f4
+	store.d:    	e <- f6
+
+label1:    	
+	goto label3
+
+label2:    	
+
+label3:    	

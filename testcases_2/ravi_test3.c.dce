@@ -1,0 +1,16 @@
+  Procedure: main
+  Intermediate Code Statements
+	iLoad:    	v0 <- 5
+	store:    	a <- v0
+
+label0:    	
+	load:    	v0 <- a
+	iLoad:    	t0 <- 1
+	sub:    	t2 <- v0 , t0
+	store:    	a <- t2
+
+label1:    	
+	load:    	v0 <- a
+	iLoad:    	t0 <- 2
+	sgt:    	t1 <- v0 , t0
+	bne:    	t1 , zero : goto label0
