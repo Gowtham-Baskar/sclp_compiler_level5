@@ -936,13 +936,16 @@ void Sequence_Ast::print_assembly(ostream & file_buffer)
 }
 
 void Sequence_Ast::print_icode(ostream & file_buffer)
-{
+{	
+	bool converged = false;
 	for(list<Icode_Stmt *>::iterator it = sa_icode_list.begin() ; it != sa_icode_list.end() ; it++)
 	{
 		(*it)->print_icode(file_buffer);
 	}
-
-	optimize();
+	// while(!converged){
+		converged = optimize();	
+	// }
+	
 
 	filebuf fb;
   	fb.open (input_file_name_global + ".dce",ios::out);
@@ -956,8 +959,9 @@ void Sequence_Ast::print_icode(ostream & file_buffer)
 
 }
 
-void Sequence_Ast::optimize()
+bool Sequence_Ast::optimize()
 {
+	int sa_icode_count =  sa_icode_list.size();
 	std::set<int>endSet;
 	int index = 0;
 	endSet.insert(sa_icode_list.size());
@@ -1043,6 +1047,11 @@ void Sequence_Ast::optimize()
 	for(int i=0;i<v.size();i++){
 		sa_icode_list.splice(sa_icode_list.end(),v[i]->icode_list);
 	}
+
+	if(sa_icode_list.size() == sa_icode_count){
+		return true;
+	}
+	return false;
 
 }
 
