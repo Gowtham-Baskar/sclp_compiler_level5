@@ -1,1 +1,0 @@
-../testcases/t12.c

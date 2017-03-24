@@ -349,6 +349,14 @@ class CFG{
 				blocks[i]->remove_dead_stmt();
 			}	
 		}
+		void clear(){
+			for(int i=0;i<blocks.size();i++){
+				blocks[i]->kill.clear();
+				blocks[i]->gen.clear();
+				blocks[i]->in.clear();
+				blocks[i]->out.clear();
+			}	
+		}
 };
 
 class Sequence_Ast: public Ast{

@@ -1,1 +1,0 @@
-../testcases/s1.c

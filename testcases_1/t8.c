@@ -1,1 +1,0 @@
-../testcases/t8.c

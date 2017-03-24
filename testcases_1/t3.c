@@ -1,1 +1,0 @@
-../testcases/t3.c

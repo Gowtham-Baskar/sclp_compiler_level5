@@ -1036,26 +1036,31 @@ bool Sequence_Ast::optimize()
 		}
 		
 	}
-	cfg.create_gen_kill();
-	// cfg.print_gen_kill();
-	cfg.create_in_out_driver();
-	// cfg.print_in_out();
+	while(true){
+		cfg.create_gen_kill();
+		// cfg.print_gen_kill();
+		cfg.create_in_out_driver();
+		// cfg.print_in_out();
 
-	cfg.remove_dead_stmt();
-	// cout<<"final"<<endl;
-	// cfg.printBasicBlocks();
+		cfg.remove_dead_stmt();
+		cfg.clear();
+		// cout<<"final"<<endl;
+		// cfg.printBasicBlocks();
 
-	sa_icode_list_opt.clear();
-	vector<BasicBlock*> v = cfg.get_blocks();
-	for(int i=0;i<v.size();i++){
-		sa_icode_list_opt.splice(sa_icode_list_opt.end(),v[i]->icode_list);
+		int sa_icode_list_opt_count = sa_icode_list_opt.size();
+		// cout<<"new old "<<sa_icode_list_opt_count<<endl;
+		sa_icode_list_opt.clear();
+		vector<BasicBlock*> v = cfg.get_blocks();
+		for(int i=0;i<v.size();i++){
+			sa_icode_list_opt.insert(sa_icode_list_opt.end(),v[i]->icode_list.begin(),v[i]->icode_list.end());
+		}
+
+		// cout<<"new size "<<sa_icode_list_opt.size()<<endl;
+		if(sa_icode_list_opt.size() == sa_icode_list_opt_count){
+			break;
+		}
 	}
-
-	if(sa_icode_list_opt.size() == sa_icode_count){
-		return true;
-	}
-	return false;
-
+	
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1125,6 +1130,8 @@ bool BasicBlock::check_opd_type(Ics_Opd * i){
 }
 
 void BasicBlock::create_gen_kill(){
+	// kill.clear();
+	// gen.clear();
 	for(list<Icode_Stmt*>::iterator it = icode_list.begin(); it!=icode_list.end() ; it++){
 		if(typeid(**it)==typeid(Move_IC_Stmt)){
 			Ics_Opd * result = (*it)->get_result();
@@ -1185,11 +1192,16 @@ void BasicBlock::create_gen_kill(){
 void BasicBlock::remove_dead_stmt(){
 	set<long int> current = out;
 	list<Icode_Stmt*>::iterator it = icode_list.end();
+	if(it == icode_list.begin()){
+		return;
+	}
 	it--;
 	bool to_delete = false;
+
 	for(; ; it--){
 		// (*it)->print_icode(cout);
 		if(typeid(**it)==typeid(Control_Flow_IC_Stmt)){
+
 			Ics_Opd * opd1 = (*it)->get_opd1();
 			Ics_Opd * opd2 = (*it)->get_opd2();
 			if(check_opd_type(opd1)){
@@ -1200,6 +1212,7 @@ void BasicBlock::remove_dead_stmt(){
 			}
 		}
 		else if(typeid(**it)==typeid(Compute_IC_Stmt)){
+			
 			Ics_Opd * result = (*it)->get_result();
 			Ics_Opd * opd1 = (*it)->get_opd1();
 			Ics_Opd * opd2 = (*it)->get_opd2();
@@ -1242,12 +1255,11 @@ void BasicBlock::remove_dead_stmt(){
 				}
 			}
 		}
-
 		if(it == icode_list.begin()){
 			break;
-			cout<<"here"<<endl;
 		}
 	}
+
 
 	// cout<<endl<<"deleted stmts "<<endl;
 	// (*it)->print_icode(cout);
@@ -1272,6 +1284,7 @@ void CFG::create_in_out_driver(){
 }
 
 void CFG::create_in_out(BasicBlock *b, set<BasicBlock*>&explored, bool &converged){
+
 	explored.insert(b);
 	set<long>temp;
 	if(b->succ_blocks.size() == 0)	// Block without successor. Out can be computed

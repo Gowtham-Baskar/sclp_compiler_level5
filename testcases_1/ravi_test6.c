@@ -1,1 +1,0 @@
-../testcases/ravi_test6.c
