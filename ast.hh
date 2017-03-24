@@ -280,6 +280,7 @@ public:
 	set<long int> kill;
 	set<long int> in;
 	set<long int> out;
+	int block_num;
 
 	void insert_stmt(Icode_Stmt* it);
 	void print_block();
@@ -301,7 +302,6 @@ class CFG{
 		}
 		void printBasicBlocks(){
 			for(int i=0;i<blocks.size();i++){
-				std::cout<<"Block "<<i<<std::endl;
 				blocks[i]->print_block();
 			}
 		}
@@ -329,9 +329,11 @@ class CFG{
 		}
 		void print_in_out(){
 			for(int i=0;i<blocks.size();i++){
-				cout<<"lock num "<<i<<endl;
 				blocks[i]->print_in_out();
 			}
+		}
+		vector<BasicBlock*>	get_blocks(){
+			return blocks;
 		}
 		// runs DFS
 		void create_in_out_driver();
