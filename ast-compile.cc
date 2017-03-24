@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "common-classes.hh"
+#include "common.hh"
 #include "error-display.hh"
 #include "user-options.hh"
 #include "icode.hh"
@@ -936,12 +937,23 @@ void Sequence_Ast::print_assembly(ostream & file_buffer)
 
 void Sequence_Ast::print_icode(ostream & file_buffer)
 {
-	optimize();
 	for(list<Icode_Stmt *>::iterator it = sa_icode_list.begin() ; it != sa_icode_list.end() ; it++)
 	{
 		(*it)->print_icode(file_buffer);
 	}
-	
+
+	optimize();
+
+	filebuf fb;
+  	fb.open (input_file_name_global + ".dce",ios::out);
+  	ostream os(&fb);
+  	os<<"  Procedure: main\n  Intermediate Code Statements\n";
+	for(list<Icode_Stmt *>::iterator it = sa_icode_list.begin() ; it != sa_icode_list.end() ; it++)
+	{
+		(*it)->print_icode(os);
+	}
+	fb.close();
+
 }
 
 void Sequence_Ast::optimize()
@@ -993,8 +1005,11 @@ void Sequence_Ast::optimize()
 		
 	}
 	bb->block_num = cfg.get_number_blocks();
-	cfg.insertBasicBlock(bb);
-	cfg.printBasicBlocks();
+	if(!bb->icode_list.empty()){
+		cfg.insertBasicBlock(bb);	
+	}
+	
+	// cfg.printBasicBlocks();
 	// cout<<"printing incoming "<<endl;
 	// for(std::map<string,int>::iterator it = label_incoming.begin(); it!= label_incoming.end(); it++){
 	// 	cout<<it->first<<" "<<it->second<<endl;
@@ -1006,7 +1021,7 @@ void Sequence_Ast::optimize()
 	// }
 
 	for(multimap<int,string>::iterator it = label_outgoing.begin(); it != label_outgoing.end() ; it++ ){
-		if(it->second == "next" && it->first!= cfg.get_number_blocks()){
+		if(it->second == "next" && it->first!= cfg.get_number_blocks()-1){
 			cfg.update_succ(it->first,it->first+1);
 		}
 		else{
@@ -1015,13 +1030,13 @@ void Sequence_Ast::optimize()
 		
 	}
 	cfg.create_gen_kill();
-	cfg.print_gen_kill();
+	// cfg.print_gen_kill();
 	cfg.create_in_out_driver();
-	cfg.print_in_out();
+	// cfg.print_in_out();
 
 	cfg.remove_dead_stmt();
-	cout<<"final"<<endl;
-	cfg.printBasicBlocks();
+	// cout<<"final"<<endl;
+	// cfg.printBasicBlocks();
 
 	sa_icode_list.clear();
 	vector<BasicBlock*> v = cfg.get_blocks();
@@ -1038,7 +1053,7 @@ void BasicBlock::insert_stmt( Icode_Stmt* it){
 	icode_list.push_back(it);
 }
 void BasicBlock::print_block(){
-	cout<<"block "<<block_num<<endl;
+	// cout<<"block "<<block_num<<endl;
 	for(list<Icode_Stmt*>::iterator it = icode_list.begin(); it!=icode_list.end() ; it++){
 		(*it)->print_icode(std::cout);
 	}
@@ -1180,8 +1195,8 @@ void BasicBlock::remove_dead_stmt(){
 				if(out.find(get_id(result))==out.end()){
 					if(current.find(get_id(result))==current.end()){
 						//remove dead code
-						cout<<endl<<"deleted stmts "<<endl;
-						(*it)->print_icode(cout);
+						// cout<<endl<<"deleted stmts "<<endl;
+						// (*it)->print_icode(cout);
 						// cout<<endl;
 
 						it = icode_list.erase(it);
@@ -1212,8 +1227,8 @@ void BasicBlock::remove_dead_stmt(){
 				if(out.find(get_id(result))==out.end()){
 					if(current.find(get_id(result))==current.end()){
 						//remove dead code
-						cout<<endl<<"deleted stmts "<<endl;
-						(*it)->print_icode(cout);
+						// cout<<endl<<"deleted stmts "<<endl;
+						// (*it)->print_icode(cout);
 						// cout<<endl;
 						it = icode_list.erase(it);
 					}

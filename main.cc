@@ -8,6 +8,7 @@
 using namespace std;
 
 #include "common-classes.hh"
+#include "common.hh"
 #include "error-display.hh"
 #include "user-options.hh"
 #include "symbol-table.hh"
@@ -18,10 +19,12 @@ using namespace std;
 
 #include "dirent.h"
 
+string input_file_name_global;
+
 int main(int argc, char * argv[]) 
 {
 	string input_file_name = command_options.process_user_command_options(argc, argv);
-
+	input_file_name_global = input_file_name;
 	Parser cfglp_parser(input_file_name);
 
 	CHECK_INPUT((!cfglp_parser.parse()), "Cannot parse the input program", NO_FILE_LINE);
